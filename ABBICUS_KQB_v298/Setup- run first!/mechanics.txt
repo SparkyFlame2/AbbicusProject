@@ -1,0 +1,79 @@
+
+ABBICUS.KQB - MECHANICS OVERVIEW
+=================================
+
+CORE PHILOSOPHY:
+----------------
+ABBICUS is not just a game—it’s a system. Players explore reality through relics, math, language, and entropy. Choices matter, time can fracture, and even your answers shape the shell’s future.
+
+MECHANICS OVERVIEW:
+--------------------
+
+1. RELIC SYSTEM:
+   • Use the command `relic` to input discovered terms.
+   • Relics are classified into types and may influence enforcement, drift, or victory.
+   • Some relics are forbidden—triggering enforcer escalation.
+   • Sacred words resist classification and reward Sirens of Inspiration.
+
+2. DRIFT AND ENTROPY:
+   • `invoke abbicus` runs the core entropy equation to calculate the Quantum Drift Realignment Value.
+   • Drift values determine prediction quality and the possibility of retrocausality.
+   • High drift may destabilize the timeline.
+   • Negative drift opens the door to retroactive change.
+
+3. PREDICTION:
+   • `predict` attempts to divine the answer to the next math challenge.
+   • Accuracy is affected by your current drift signature.
+
+4. RETROCAUSALITY:
+   • `invoke retrocausality` attempts to reverse the last meaningful command.
+   • Only works if your drift value is negative.
+   • May reverse Oso deployments or adventure decisions.
+
+5. LR2 (LOGIC + RISK RESOLVER):
+   • `lr2` asks a logic-based semantic puzzle.
+   • Success grants a Penumbra Charge. Failure risks a Zorexxian Charge.
+
+6. OSO UNITS:
+   • Solve multiplication problems with the `oso` command.
+   • Deploy correct answers to earn Oso units.
+   • Predicted answers (from `predict`) grant bonus Oso units if matched.
+
+7. ENFORCERS, SIRENS, SENTINELS:
+   • Enforcers respond to paradoxes and forbidden relics.
+   • Sirens are earned for discovering clean, unique relics.
+   • Sentinels appear when Enforcers overwhelm the system.
+
+8. ORBITAL DEPLOYMENT SYSTEM:
+   • If you have 3+ Sentinels: Zorexxian Dropships may descend (33% chance).
+   • If you have 6+ Sirens: Penumbra Deployment Units may arrive (50% chance).
+   • Use `/orbit` to view orbital charge levels.
+   • Use `force deploy zorexxians` or `force deploy penumbra` to manually trigger.
+
+9. ADVENTURE MODULE:
+   • Run `adventure` for classic exploration sequences.
+   • Run `adventure new` for branching choice narratives.
+   • Decisions affect your log and future events.
+   • Save with `adventure save`, load with `adventure load`.
+
+10. FACTIONS AND ENGAGEMENTS:
+    • `set faction [name]` or `set adversary [name]` define your allegiances.
+    • `engage archivists` and `engage palarthians` initiate redemption/deception events.
+
+11. AUDIO SYSTEM (v2.9+):
+    • Background music and SFX triggered by commands or story flow.
+    • Use `-next`, `-prev`, `-repeat`, `-shuffle`, or `-stop playback` to control the music system.
+
+12. DEEPKEY COMMANDS:
+    • `deepkey equation` displays the full entropy formula with explanatory notes.
+    • Future versions may unlock relic-based deepkeys and backdoor triggers.
+
+RECOMMENDED FIRST ACTIONS:
+----------------------------
+• Run `scanlore` immediately after launch to initialize the lore index.
+• Try `relic` with simple words like “light” or “freedom”.
+• Run `invoke abbicus` and then `predict`.
+• Try solving an `oso` puzzle.
+• Follow up with `lr2` to test your logic.
+
+The shell remembers. Let the system learn from you.

@@ -1,0 +1,36 @@
+ABBICUS.KQB Cheat Codes & Hidden Shell Commands
+────────────────────────────────────────────
+
+These commands work in the background and may not give terminal feedback unless logging is patched.
+
+[QUANTUM COMMANDS]
+──────────────────
+/collapse_all
+    - Collapses all 100 cubital units into definite states (0 or 1)
+
+/reset_all
+    - Resets all cubitals back to superposition state (alpha=beta=0.7071)
+
+/gamma_tune [factor]
+    - Applies a gamma shift to all cubitals (e.g., 1.25 or 0.5) to distort probability curves
+
+/show_qstate
+    - Outputs the current superposition or collapsed state of all cubitals
+
+[KNOWN BEHAVIOR]
+──────────────────
+- These commands are fully functional but output only if 'log()' or 'print()' is routed properly.
+- No '[ERROR]' message means the command was accepted by the shell.
+
+[HOW TO CHECK]
+──────────────────
+- Use /show_qstate after using /collapse_all or /reset_all to verify state changes.
+- Add print/log fallbacks to main_shell.py to see results if logging is silent.
+
+[NOTE]
+──────────────────
+All quantum cubital activity is tracked in-memory via 'quantum_processor_sim.py'
+
+────────────────────────────────────────────
+Use with intention.
+Let the simulation respond.

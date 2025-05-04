@@ -1,0 +1,2 @@
+Run with: python abbicus_shell_v26.py
+Optional: --lucid for Lucid Drift Mode

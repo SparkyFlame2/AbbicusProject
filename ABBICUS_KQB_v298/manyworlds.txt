@@ -1,0 +1,1 @@
+Each choice spawns a branch. The Abbicus remembers collapsed paths.
