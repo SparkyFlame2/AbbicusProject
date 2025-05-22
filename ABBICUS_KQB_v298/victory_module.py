@@ -22,6 +22,17 @@ advanced_oso = 0
 sirens = 0
 ostriches= 0
 archive_mastery = 0
+penumbra_factories = 0
+
+time_state = {
+    "jump_forward_tokens": 0,
+    "jump_retro_tokens": 0,
+    "zorrexian_challenge_ready_at": 0,
+    "has_traverser": False,
+    "has_retro_pass": False,
+    "cycle_pass_unlocked": False
+}
+
 
 def add_victory_points(amount=1):
     global victory_points
@@ -244,3 +255,20 @@ def show_status():
     print("\n==[ORBITAL STATUS REPORT]==")    
     print(f"Zorexxian Dropship Charges: {zorexx.zorexxian_charges}")
     print(f"Penumbra Deployment Charges: {penumbra.penumbra_charges}")
+    
+    from buy_module import penumbra_factories, factory_queue
+    from zorexxian_module import zorrexian_waves_remaining
+
+    print(f"Jump Charges (Forward): {time_state.get('jump_forward_tokens', 0)}")
+    print(f"Jump Charges (Retro): {time_state.get('jump_retro_tokens', 0)}")
+    print(f"Traverser Owned: {'Yes' if time_state.get('has_traverser', False) else 'No'}")
+
+    # Check recent penumbra factory activity
+    active_factories = sum(1 for t, _ in factory_queue if time.time() - t <= 600)
+    print(f"Penumbra Factories Active: {active_factories} / 5")
+
+    print(f"Zorexxian Challenge Waves Left: {zorrexian_waves_remaining}")
+    
+    print(f"Zorexxian Dropship Charges: {zorexx.zorexxian_charges}")
+    print(f"Penumbra Deployment Charges: {penumbra.penumbra_charges}")
+

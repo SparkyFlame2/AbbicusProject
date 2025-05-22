@@ -34,6 +34,8 @@ import static_visualizer_windowed as visualizer
 import playlist_module
 import threading
 import log_session
+import buy_module
+import shop_module
 
 print("""
 ╔═════════════════════════════════════════════════════════════╗
@@ -82,10 +84,25 @@ lore_ready = False
 adventure_log = []
 current_adventure_era = "origin"
 
+time_state = {
+    "jump_forward_tokens": 0,
+    "jump_retro_tokens": 0,
+    "zorrexian_challenge_ready_at": 0,
+    "has_traverser": False,
+    "has_retro_pass": False,
+    "cycle_pass_unlocked": False
+}
+
 shell_state = {
     "last_oso_result": None,
     "oso_units": 0
 }
+buy_module.set_interfaces(enforce, victory, time_state, {
+    "mastery_points": victory.archive_mastery,
+    "has_traverser": False,
+    "has_retro_pass": False,
+    "cycle_pass_unlocked": False
+})
 
 sacred_words = [
 
@@ -95,6 +112,13 @@ sacred_words = [
 ]
 
 session_log = []
+
+quantum_cores = {
+    "core_alpha": qps.QuantumCore("core_alpha", 25),
+    "core_beta": qps.QuantumCore("core_beta", 25),
+    "core_gamma": qps.QuantumCore("core_gamma", 25),
+    "core_delta": qps.QuantumCore("core_delta", 25),
+}
 
 qtp_system = qtp.QuantumThreadPlate()
 qtp_system.boot()
@@ -108,6 +132,11 @@ gpu = qgpu.QGPU(update_interval=15)
 qtp_system.register_module("quantum_gpu_windowed")
 qtp_system.entangle("quantum_processor", "quantum_gpu_windowed")
 gpu_window = qgpuw.QGPUWindowed(interval=10)
+
+victory.time_state = time_state
+from buy_module import penumbra_factories
+victory.penumbra_factories = penumbra_factories
+
 
 def log(line):
     print(line)
@@ -202,7 +231,6 @@ def handle_relic():
         return
 
     classification = classifier.classify_relic(tag)
-    return
 
     enforce.oso_units += gained_oso
     enforce.ostriches += gained_ostrich
@@ -222,7 +250,13 @@ def handle_relic():
             log("[ENFORCEMENT OVERLOAD] Sentinel has arrived.")
 
 def invoke_abbicus():
-    val = core.abbicus_core()
+    inf_energy = 1.0 + (enforce.enforcers * 0.25)
+    entropy_rate = 0.5
+    z = 3
+    n = 5
+    mode="auto"
+
+    val = core.abbicus_core(inf_energy, entropy_rate, z, n, mode)
     predict.store_drift(val)
     drift.store_drift_value(val)
     log(f"[ABBI] Quantum Drift Realignment Value: {val:.3e}")
@@ -495,6 +529,13 @@ while True:
         term = cmd.split(" ", 1)[1].strip().lower() if " " in cmd else input("Term to search: ").lower()
         lore.freq(term)
     elif cmd == "relic":
+        retro.log_action("relic", {
+            "enforcers": enforce.enforcers,
+            "sirens": victory.sirens,
+            "unlocked_relics": list(unlocked_relics),
+            "oso_units": enforce.oso_units,
+            "adventure_log": adventure_log.copy()
+        })
         handle_relic()
     elif cmd == "oso":
         enforce.oso()
@@ -506,12 +547,28 @@ while True:
     elif cmd == "simulate war":
         enforce.simulate_war()
     elif cmd == "battle":
+        retro.log_action("battle", {
+            "enforcers": enforce.enforcers,
+            "sirens": victory.sirens,
+            "unlocked_relics": list(unlocked_relics),
+            "oso_units": enforce.oso_units,
+            "adventure_log": adventure_log.copy()
+        })
         victory.simulate_battle()
     elif cmd == "craft oso":
+        retro.log_action("craft oso", {
+            "enforcers": enforce.enforcers,
+            "sirens": victory.sirens,
+            "oso_units": enforce.oso_units
+        })
         victory.craft_advanced_oso()
         enforce.show_units()
         victory.show_status()
     elif cmd == "dream":
+        retro.log_action("dream", {
+            "drift": abbicus_predict.get_drift(),
+            "victory_points": victory.victory_points
+        })
         phrase = input("Your dream phrase: ")
         tag = hex(abs(hash(phrase)))[:4]
         dreams.append((tag, phrase))
@@ -526,12 +583,30 @@ while True:
         paradox = input("State your paradox: ")
         memory_log.append(("paradox", paradox))
         log("[Paradox Accepted] Echo saved to Vault.")
+
     elif cmd == "jump":
+        invoke_abbicus()
+        drift_val = drift.get_drift_value()
         visualizer.trigger_jump_flash()
-        drift.list_eras()
+        drift.get_current_era()
+        print("Current Era:", drift.get_current_era())
+        print("Available Eras:", drift.list_all_eras())
         tag = input("Enter era tag: ").strip()
-        drift.jump_to_era(tag)
-        visualizer.trigger_jump_flash()
+
+        current_ts = drift.get_era_timestamp(drift.current_era)
+        target_ts = drift.get_era_timestamp(tag)
+        
+        if drift_val > 0 and time_state["jump_forward_tokens"] > 0:
+            time_state["jump_forward_tokens"] -= 1
+            log(drift.jump_to_era(tag))
+            visualizer.trigger_jump_flash()
+        elif drift_val < 0 and time_state["jump_retro_tokens"] > 0:
+            time_state["jump_retro_tokens"] -= 1
+            log(drift.jump_to_era(tag))
+            visualizer.trigger_jump_flash()
+        else:
+            log("[ERROR] Invalid drift or insufficient jump charges.")
+
     elif cmd == "invoke abbicus":
         invoke_abbicus()
     elif cmd == "predict":
@@ -555,6 +630,10 @@ while True:
     elif cmd == "adventure load":
         run_adventure_load()
     elif cmd == "npc":
+        retro.log_action("npc", {
+            "drift": abbicus_predict.get_drift(),
+            "npc_history": npc.history.copy() if hasattr(npc, "history") else []
+        })
         run_npc()
     elif cmd.startswith("save"):
         try:
@@ -564,8 +643,8 @@ while True:
             save.q_state = q_state
             save.victory_unlocked = victory_unlocked
 
-        except:
-            log("[ERROR] Use format: save [filename]")
+        except Exception as e:
+            log(f"[ERROR] Save failed: {e}")
     elif cmd.startswith("load"):
         try:
             filename = cmd.split(" ", 1)[1].strip()
@@ -574,17 +653,32 @@ while True:
             q_state = save.q_state
             victory_unlocked = save.victory_unlocked
 
-        except:
-            log("[ERROR] Use format: load [filename]")
+        except Exception as e:
+            log(f"[ERROR] Load failed: {e}")
+    
     elif cmd == "set faction archivists":
         faction.set_faction("Archivists")
     elif cmd == "set adversary palarthians":
         faction.set_adversary("Palarthians")
     elif cmd == "engage archivists":
+        retro.log_action("engage archivists", {
+            "enforcers": enforce.enforcers,
+            "sirens": victory.sirens,
+            "victory_points": victory.victory_points
+        })
         faction.engage_faction()
     elif cmd == "engage palarthians":
+        retro.log_action("engage palarthians", {
+            "enforcers": enforce.enforcers,
+            "sirens": victory.sirens,
+            "victory_points": victory.victory_points
+        })
         faction.engage_adversary()
     elif cmd == "lr2":
+        retro.log_action("lr2", {
+            "victory_points": victory.victory_points,
+            "enforcers": enforce.enforcers
+        })
         outcome = lr2.run_lr2_puzzle()
         if outcome == "success":
             penumbra.accrue_charge()
@@ -595,6 +689,10 @@ while True:
         log(f"Zorexxian Dropship Charges: {zorexx.get_charges()}")
         log(f"Penumbra Deployment Charges: {penumbra.get_charges()}")
     elif cmd == "lr2 advanced":
+        retro.log_action("lr2 advanced", {
+            "victory_points": victory.victory_points,
+            "enforcers": enforce.enforcers
+        })
         outcome = lr2.run_advanced_lr2_puzzle()
         if outcome == "success":
             penumbra.accrue_charge()
@@ -677,6 +775,31 @@ while True:
         except Exception as e:
             print(f"[ERROR] Could not load Qstate: {e}")
 
+    elif cmd.startswith("/core"):
+        parts = cmd.split()
+        if len(parts) < 3:
+            log("Usage: /core [collapse/reset/status] [0-3]")
+        else:
+            action = parts[1]
+            try:
+                core_id = int(parts[2])
+                core = qps.quantum_cores.get(core_id)
+                if not core:
+                    log(f"Core {core_id} not found.")
+                elif action == "collapse":
+                    core.collapse_all()
+                    log(f"Core {core_id} collapsed.")
+                elif action == "reset":
+                    core.reset_all()
+                    log(f"Core {core_id} reset.")
+                elif action == "status":
+                    for state in core.get_states():
+                        log(state)
+                else:
+                    log("Invalid action. Use: collapse, reset, status.")
+            except ValueError:
+                log("Invalid core ID. Must be an integer 0-3.")
+
     elif cmd == "/collapse_all":
         qps.collapse_all()
         log("[QUANTUM] All cubitals collapsed.")
@@ -702,6 +825,11 @@ while True:
         states = qps.show_all_states()
         for state in states:
             log(state)
+    elif cmd == "/get_drift_state":
+        val = drift.get_drift_value()
+        polarity = "POSITIVE" if val > 0 else "NEGATIVE" if val < 0 else "NEUTRAL"
+        print(f"[DRIFT] Last Value: {val:.3e} | Polarity: {polarity}")
+
 
     elif cmd == "help music":
         handle_help_music()
@@ -714,6 +842,21 @@ while True:
 
     elif cmd.startswith("-"):
         audio.handle_command(cmd)
+
+
+    elif cmd.startswith("buy "):
+        item = cmd[4:].strip()
+        log(buy_module.buy(item))
+    elif cmd == "/claim_factories":
+        log(buy_module.claim_factory_units())
+    elif cmd == "shop":
+        from shop_module import show_shop
+        print(show_shop())
+    elif cmd == "/shop":
+        from shop_module import show_shop
+        print(show_shop())
+
+    drift.drift_nudge()
 
     print_status()
 

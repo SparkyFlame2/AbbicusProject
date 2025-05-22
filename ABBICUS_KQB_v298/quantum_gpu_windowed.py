@@ -5,7 +5,7 @@ import time
 import sys
 
 class QGPUWindowed:
-    def __init__(self, width=1200, height=600, interval=10):
+    def __init__(self, width=1600, height=650, interval=10):
         self.width = width
         self.height = height
         self.interval = interval
@@ -33,10 +33,10 @@ class QGPUWindowed:
 
         while self.running:
             screen.fill((0, 0, 0))
-            column_width = self.width // 3
+            column_width = self.width // 4
             max_rows = (self.height - 40) // 20
             num_columns = max(1, (len(register) + max_rows - 1) // max_rows)
-            columns = [[] for _ in range(num_columns)]
+            columns = [[] for _ in range(4)]
 
             for i, q in enumerate(register[:100]):
                 a = q.alpha
@@ -58,20 +58,23 @@ class QGPUWindowed:
                 collapsed_color = (0, 255, 0) if collapsed else (255, 68, 68)
                 alpha = f"{a.real:.3f}+{a.imag:.3f}j"
                 beta = f"{b.real:.3f}+{b.imag:.3f}j"
-                col_index = i // max_rows
+                col_index = i // 25
                 columns[col_index].append({
                     "index": i,
-                    "alpha": alpha,
-                    "beta": beta,
+                    "alpha": f"{q.alpha.real:.3f}+{q.alpha.imag:.3f}j",
+                    "beta": f"{q.beta.real:.3f}+{q.beta.imag:.3f}j",
                     "collapsed": "✅" if collapsed else "❌",
-                    "alpha_color": alpha_color,
-                    "beta_color": beta_color,
-                    "collapsed_color": collapsed_color
+                    "alpha_color": (0, 255, 170) if abs(abs(q.alpha) - abs(q.beta)) >= 0.05 and abs(q.alpha) > abs(q.beta) else (170, 170, 170),
+                    "beta_color": (255, 85, 119) if abs(abs(q.alpha) - abs(q.beta)) >= 0.05 and abs(q.beta) > abs(q.alpha) else (170, 170, 170),
+                    "collapsed_color": (0, 255, 0) if q.collapsed_value else (255, 68, 68)
                 })
 
             for col_idx, column in enumerate(columns):
                 x_offset = col_idx * column_width + 10
                 y_offset = 10
+                core_label = font.render(f"Core {col_idx}", True, (255, 255, 0))
+                screen.blit(core_label, (x_offset, y_offset))
+                y_offset += 20
                 header = font.render("#   Alpha                Beta                 Collapsed", True, (200, 200, 200))
                 screen.blit(header, (x_offset, y_offset))
                 y_offset += 20

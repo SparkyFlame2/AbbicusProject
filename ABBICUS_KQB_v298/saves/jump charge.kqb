@@ -1,6 +1,6 @@
 {
   "enforcers": 3,
-  "oso_units": 3,
+  "oso_units": 0,
   "ostriches": 2,
   "victory_points": 3,
   "time_jail_count": 0,
@@ -8,7 +8,7 @@
   "sentinels": 0,
   "sentinel_shards": 0,
   "advanced_oso": 0,
-  "sirens": 5,
+  "sirens": 0,
   "zorexxian_charges": 0,
   "penumbra_charges": 0,
   "unlocked_relics": [],

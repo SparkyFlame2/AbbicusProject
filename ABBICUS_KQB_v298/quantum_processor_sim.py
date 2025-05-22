@@ -50,6 +50,72 @@ class Qubital:
 # Initialize 100 Qubitals
 quantum_register = [Qubital(i) for i in range(100)]
 
+# Define QuantumCore class that works with your advanced Qubital objects
+class QuantumCore:
+    def __init__(self, core_id, qubits):
+        self.core_id = core_id
+        self.register = qubits
+
+    def collapse_all(self):
+        for q in self.register:
+            q.collapse()
+
+    def reset_all(self):
+        for q in self.register:
+            q.reset()
+
+    def gamma_tune(self, factor):
+        for q in self.register:
+            q.gamma_shift(factor)
+
+    def get_states(self):
+        return [q.get_state() for q in self.register]
+
+# Partition the global quantum register into 4 logical cores
+core0 = QuantumCore(0, quantum_register[0:25])
+core1 = QuantumCore(1, quantum_register[25:50])
+core2 = QuantumCore(2, quantum_register[50:75])
+core3 = QuantumCore(3, quantum_register[75:100])
+
+quantum_cores = {
+    0: core0,
+    1: core1,
+    2: core2,
+    3: core3
+}
+
+def collapse_core(core_id):
+    if core_id in quantum_cores:
+        quantum_cores[core_id].collapse_all()
+        return f"Core {core_id} collapsed."
+    return "Invalid core ID."
+
+def reset_core(core_id):
+    if core_id in quantum_cores:
+        quantum_cores[core_id].reset_all()
+        return f"Core {core_id} reset."
+    return "Invalid core ID."
+
+def gamma_tune_core(core_id, factor):
+    if core_id in quantum_cores:
+        quantum_cores[core_id].gamma_tune(factor)
+        return f"Core {core_id} gamma tuned by {factor}."
+    return "Invalid core ID."
+
+def get_core_states(core_id):
+    if core_id in quantum_cores:
+        return quantum_cores[core_id].get_states()
+    return []
+
+def get_all_core_states():
+    return {
+        core_id: get_core_states(core_id)
+        for core_id in quantum_cores
+    }
+
+def get_register():
+    return quantum_register
+
 def collapse(self):
         probability_zero = abs(self.alpha)**2
         result = 0 if random.random() < prob_zero else 1
